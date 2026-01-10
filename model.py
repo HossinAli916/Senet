@@ -5,6 +5,8 @@ import random
 class grid:
     def __init__(self):
         self.grid = np.full((3, 10), "", dtype=object)
+        self.b_swap = 0
+        self.w_swap = 0
         rows, cols = self.grid.shape
         # Special cells
         self.grid[1][5] = "𓋹"
@@ -125,7 +127,24 @@ class grid:
         new_x = new_index // cols
         new_y = new_index % cols
         
-        #rules 
+        #exchange v2.0
+        dest = self.grid[new_x, new_y]
+        src = self.grid[x, y]
+        orig_dest = dest
+        swapped = False
+        if isinstance(dest, str) and isinstance(src, str):
+            if dest.endswith("W") and src.endswith("B"):
+                print("exchanged with white piece")
+                self.grid[new_x, new_y] = src
+                self.grid[x, y] = orig_dest
+                swapped = True
+                self.b_swap +=1
+            elif dest.endswith("B") and src.endswith("W"):
+                print("exchanged with black piece")
+                self.grid[new_x, new_y] = src
+                self.grid[x, y] = orig_dest
+                swapped = True
+                self.w_swap +=1
         if new_x == 1 and new_y ==5:
             print("{peice} landed on the house of water,moving to the house of resiriction if available")
             if self.grid[1,5]=="𓋹":
@@ -154,10 +173,13 @@ class grid:
                             break
 
 
-        # Perform move
-        self.grid[x, y] = ""
-        self.grid[new_x, new_y] = piece
-        print(f"Moved {piece} from {(x,y)} to {(new_x,new_y)} (roll={roll})")
+        
+        if not swapped:
+            self.grid[x, y] = ""
+            self.grid[new_x, new_y] = piece
+            print(f"Moved {piece} from {(x,y)} to {(new_x,new_y)} (roll={roll})")
+        else:
+            print(f"Swapped {piece} at {(x,y)} with {orig_dest} at {(new_x,new_y)} (roll={roll})")
         return True
     def check_win(self) ->bool:
         count_w,count_b = self.get_counts()
